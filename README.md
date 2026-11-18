@@ -1,3 +1,54 @@
+# National Resource Navigator
+
+## HRSA Health Center Directory MCP Server
+
+A feasibility prototype developed for the GSA MCP Server and SI Agent
+Government Hackathon.
+
+National Resource Navigator uses Model Context Protocol (MCP) tools to
+search a local snapshot of HRSA health center service delivery sites.
+
+### MCP tools
+
+- `search_city_state`: Search health center sites by city and state.
+- `search_zip5`: Search sites by five-digit ZIP code.
+- `check_hrsa_dataset`: Report dataset integrity and record count.
+
+### Data provenance and limitations
+
+The project uses an HRSA Health Center Sites CSV snapshot dated
+November 11, 2026, stored in `src/hrsa_server/data/`.
+
+Search results describe records in that snapshot. They do not establish
+current appointment availability, eligibility, payer acceptance, or
+real-time service status. No additional locations should be inferred
+from an unsuccessful search.
+
+### Implementation
+
+- MCP server: `src/hrsa_server/app.py`
+- Search implementation: `src/hrsa_server/tools/search_hrsa.py`
+- Result formatting: `src/hrsa_server/tools/display_hrsa.py`
+- IBM watsonx Orchestrate toolkit: `deploy/ibm/hrsa-mcp-toolkit/`
+- Transport: stdio via FastMCP
+
+### Validation
+
+The repository uses Ruff and pytest. On November 18, 2026, local lint
+and formatting checks passed, and the existing automated test suite
+reported 26 passing tests. These checks do not establish that all
+agent behavior or real-world referral scenarios are validated.
+
+---
+
+## Original GSA Starter Template Documentation
+
+The documentation below describes the original GSA template and its
+general development and deployment options. Project-specific HRSA
+implementation files are identified above.
+
+---
+
 # GSA MCP Hackathon — Server Template
 
 A ready-to-run starter for building a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server in Python, plus deployment kits for **IBM Cloud (watsonx Orchestrate)** and **Databricks**.
