@@ -4,6 +4,7 @@ import csv
 import hashlib
 import io
 from pathlib import Path
+
 from .display_hrsa import format_hrsa_result
 
 DATA_FILE = (
@@ -11,10 +12,7 @@ DATA_FILE = (
     / "data"
     / "Health_Center_Service_Delivery_and_LookAlike_Sites.csv"
 )
-BASELINE_SHA256 = (
-    "142e198931ff3f23802ddba071eda45a"
-    "bb10778af115d0c7c6841210d9f99f37"
-)
+BASELINE_SHA256 = "142e198931ff3f23802ddba071eda45abb10778af115d0c7c6841210d9f99f37"
 DATASET_TITLE = "HRSA Health Center Sites"
 MOBILE_SEASONAL_CAUTION = (
     "The listed address may not be where or when services are delivered; "
@@ -48,11 +46,13 @@ def get_hrsa_snapshot_sha256():
 
 
 def _provenance(rows, actual_hash):
-    dates = sorted({
-        row.get("Data Warehouse Record Create Date", "").strip()
-        for row in rows
-        if row.get("Data Warehouse Record Create Date", "").strip()
-    })
+    dates = sorted(
+        {
+            row.get("Data Warehouse Record Create Date", "").strip()
+            for row in rows
+            if row.get("Data Warehouse Record Create Date", "").strip()
+        }
+    )
     return {
         "dataset_title": DATASET_TITLE,
         "record_create_date": dates[0] if len(dates) == 1 else None,
@@ -65,7 +65,9 @@ def _provenance(rows, actual_hash):
 def _site(row):
     location_type = row.get("Health Center Location Type Description", "").strip()
     calendar = row.get("Health Center Operating Calendar", "").strip()
-    setting = row.get("Health Center Service Delivery Site Location Setting Description", "").strip()
+    setting = row.get(
+        "Health Center Service Delivery Site Location Setting Description", ""
+    ).strip()
     website = row.get("Site Web Address", "").strip()
     if website.casefold() in {"", "n/a", "na", "none", "null", "not available"}:
         website = None
@@ -74,7 +76,9 @@ def _site(row):
         or "seasonal" in location_type.casefold()
         or "seasonal" in calendar.casefold()
     )
-    restricted_setting = "school" in setting.casefold() or "correction" in setting.casefold()
+    restricted_setting = (
+        "school" in setting.casefold() or "correction" in setting.casefold()
+    )
     return {
         "bphc_id": row.get("BPHC Assigned Number", "").strip(),
         "site_name": row.get("Site Name", "").strip(),
@@ -109,26 +113,39 @@ def _failure(status, query, message):
 
 
 def _search(query, matches_row, limit):
-    if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= MAX_LIMIT:
+    if (
+        isinstance(limit, bool)
+        or not isinstance(limit, int)
+        or not 1 <= limit <= MAX_LIMIT
+    ):
         return _failure("invalid_input", query, "limit must be an integer from 1 to 10")
     try:
         rows, actual_hash = _load_verified_snapshot()
     except (OSError, UnicodeError, ValueError, csv.Error):
-        return _failure("source_unavailable", query, "HRSA dataset unavailable or integrity check failed; no listings returned")
+        return _failure(
+            "source_unavailable",
+            query,
+            "HRSA dataset unavailable or integrity check failed; no listings returned",
+        )
 
     located = [row for row in rows if matches_row(row)]
     excluded_admin_count = sum(
-        row.get("Health Center Type Description", "").strip().casefold() == "administrative"
+        row.get("Health Center Type Description", "").strip().casefold()
+        == "administrative"
         for row in located
     )
     eligible = [
-        row for row in located
-        if row.get("Health Center Type Description", "").strip().casefold() != "administrative"
+        row
+        for row in located
+        if row.get("Health Center Type Description", "").strip().casefold()
+        != "administrative"
     ]
-    eligible.sort(key=lambda row: (
-        row.get("Site Name", "").casefold(),
-        row.get("BPHC Assigned Number", ""),
-    ))
+    eligible.sort(
+        key=lambda row: (
+            row.get("Site Name", "").casefold(),
+            row.get("BPHC Assigned Number", ""),
+        )
+    )
     returned = eligible[:limit]
     result = {
         "status": "ok" if eligible else "no_match",
@@ -140,8 +157,15 @@ def _search(query, matches_row, limit):
         "sites": [_site(row) for row in returned],
         "provenance": _provenance(rows, actual_hash),
         "message": (
-            "HRSA listings do not establish current availability, eligibility, or payer acceptance."
-            if eligible else "No matching non-administrative sites in this snapshot; no other locations inferred."
+            (
+                "HRSA listings do not establish current availability, "
+                "eligibility, or payer acceptance."
+            )
+            if eligible
+            else (
+                "No matching non-administrative sites in this snapshot; "
+                "no other locations inferred."
+            )
         ),
     }
     result["display_text"] = format_hrsa_result(result)
@@ -154,11 +178,17 @@ def search_city_state(city: str, state: str, limit: int = DEFAULT_LIMIT) -> dict
     state_clean = state.strip().upper() if isinstance(state, str) else ""
     query = {"city": city_clean, "state": state_clean}
     if not city_clean or len(state_clean) != 2 or not state_clean.isalpha():
-        return _failure("invalid_input", query, "A city and two-letter state abbreviation are required")
+        return _failure(
+            "invalid_input",
+            query,
+            "A city and two-letter state abbreviation are required",
+        )
     return _search(
         query,
-        lambda row: row.get("Site City", "").strip().casefold() == city_clean.casefold()
-        and row.get("Site State Abbreviation", "").strip().upper() == state_clean,
+        lambda row: (
+            row.get("Site City", "").strip().casefold() == city_clean.casefold()
+            and row.get("Site State Abbreviation", "").strip().upper() == state_clean
+        ),
         limit,
     )
 

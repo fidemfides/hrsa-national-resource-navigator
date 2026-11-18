@@ -1,10 +1,20 @@
 from fastmcp import FastMCP
-from hrsa_server.tools.search_hrsa import load_hrsa_rows, search_city_state, search_zip5, get_hrsa_snapshot_sha256
 
+from hrsa_server.tools.search_hrsa import (
+    get_hrsa_snapshot_sha256,
+    load_hrsa_rows,
+    search_city_state,
+    search_zip5,
+)
 
 mcp = FastMCP("HRSA Feasibility Server")
-mcp.tool(description="Search HRSA health center sites by city and state.")(search_city_state)
-mcp.tool(description="Search HRSA health center sites by five-digit ZIP code.")(search_zip5)
+mcp.tool(description="Search HRSA health center sites by city and state.")(
+    search_city_state
+)
+mcp.tool(description="Search HRSA health center sites by five-digit ZIP code.")(
+    search_zip5
+)
+
 
 @mcp.tool()
 def check_hrsa_dataset() -> dict:
