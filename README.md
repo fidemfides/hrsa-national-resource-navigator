@@ -34,10 +34,14 @@ from an unsuccessful search.
 
 ### Validation
 
-The repository uses Ruff and pytest. On November 18, 2026, local lint
-and formatting checks passed, and the existing automated test suite
-reported 26 passing tests. These checks do not establish that all
-agent behavior or real-world referral scenarios are validated.
+On November 18, 2026, Ruff lint and formatting checks passed.
+All 26 inherited GSA template tests passed; these do not test HRSA
+search behavior.
+
+Lint-only changes were made after evaluation. HRSA search behavior
+was verified locally, but the updated code was not redeployed.
+The evaluation report documents remaining agent reliability failures
+and the unmet conversational acceptance gate.
 
 ---
 
