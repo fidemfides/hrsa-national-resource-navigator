@@ -242,3 +242,13 @@ Measuring how well an LLM can use your tools is the real test of server quality.
 ## License
 
 [MIT](LICENSE). See [SECURITY.md](SECURITY.md) for the vulnerability disclosure policy and hackathon security notes.
+
+## November 22, 2026 — Agent Refinement and Evaluation
+
+The post-submission evaluation addendum documents controlled B5 testing, a separate confirmed fabrication incident, regression results, and remaining limitations. See the updated evaluation report submitted to GSA.
+
+IBM watsonx Orchestrate agent instructions:
+- [Original baseline](deploy/ibm/agent_instructions_baseline.md)
+- [November 22 revised instructions](deploy/ibm/agent_instructions_2026-11-22.md)
+
+The MCP server and dataset were not modified during this refinement. The internal 21/21 acceptance gate remains unmet.
